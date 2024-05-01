@@ -1,7 +1,7 @@
 import {Component, inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogConfig, MatDialogRef} from '@angular/material/dialog';
 import {EditCourseDialogData} from './edit-course-dialog.data.model';
-import {LoadingIndicatorComponent} from '../loading/loading.component';
+import {LoadingComponent} from '../loading/loading.component';
 import {FormBuilder, ReactiveFormsModule} from '@angular/forms';
 import {CourseCategoryComboboxComponent} from '../course-category-combobox/course-category-combobox.component';
 import {firstValueFrom} from 'rxjs';
@@ -12,7 +12,7 @@ import {CoursesService} from '../services/courses.service';
     selector: 'edit-course-dialog',
     standalone: true,
     imports: [
-        LoadingIndicatorComponent,
+        LoadingComponent,
         ReactiveFormsModule,
         CourseCategoryComboboxComponent
     ],
@@ -54,6 +54,18 @@ export class EditCourseDialogComponent {
 
         if (this.data.mode === 'update') {
             await this.saveCourse(this.data.course!.id, courseProps);
+        } else if (this.data.mode === 'create') {
+            await this.createCourse(courseProps);
+        }
+    }
+
+    async createCourse(course: Partial<Course>) {
+        try {
+            const newCourse = await this.#coursesService.createCourse(course);
+            this.dialogRef.close(newCourse);
+        } catch (error) {
+            console.error(error);
+            alert('Error creating course!');
         }
     }
 

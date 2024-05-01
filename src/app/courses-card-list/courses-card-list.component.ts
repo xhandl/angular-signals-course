@@ -20,11 +20,11 @@ export class CoursesCardListComponent {
 
     courseDeleted = output<string>();
 
-    matDialog = inject(MatDialog);
+    #matDialog = inject(MatDialog);
 
     async onEditCourse(course: Course) {
         const newCourse = await openEditCourseDialog(
-            this.matDialog,
+            this.#matDialog,
             {
                 mode: 'update',
                 title: 'Edit Course',

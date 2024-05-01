@@ -3,6 +3,9 @@ import {Course, sortCoursesBySeqNo} from '../models/course.model';
 import {MatTab, MatTabGroup} from '@angular/material/tabs';
 import {CoursesCardListComponent} from '../courses-card-list/courses-card-list.component';
 import {CoursesService} from '../services/courses.service';
+import {openEditCourseDialog} from '../edit-course-dialog/edit-course-dialog.component';
+import {MatDialog} from '@angular/material/dialog';
+import {LoadingService} from '../loading/loading.service';
 
 @Component({
     selector: 'home',
@@ -21,6 +24,8 @@ export class HomeComponent {
 
     #coursesService = inject(CoursesService);
 
+    #matDialog = inject(MatDialog);
+
     beginnerCourses = computed(() => {
         const courses = this.#courses();
         return courses.filter(course => course.category === 'BEGINNER');
@@ -30,6 +35,8 @@ export class HomeComponent {
         const courses = this.#courses();
         return courses.filter(course => course.category === 'ADVANCED');
     });
+
+    #loadingService = inject(LoadingService);
 
     constructor() {
         effect(() => {
@@ -44,12 +51,14 @@ export class HomeComponent {
 
     async loadCourses() {
         try {
+            this.#loadingService.loadingOn();
             const courses = await this.#coursesService.loadAllCourses();
-
             this.#courses.set(courses.sort(sortCoursesBySeqNo));
         } catch (error) {
             alert('Error loading courses!');
             console.error(error);
+        } finally {
+            this.#loadingService.loadingOff();
         }
     }
 
@@ -73,6 +82,22 @@ export class HomeComponent {
         } catch (error) {
             console.error(error);
             alert('Error deleting course!');
+        }
+    }
+
+
+    async onAddCourse() {
+        const newCourse = await openEditCourseDialog(
+            this.#matDialog,
+            {
+                mode: 'create',
+                title: 'Create Course'
+            }
+        );
+
+        if (newCourse) {
+            const courses = this.#courses();
+            this.#courses.set([...courses, newCourse]);
         }
     }
 }
