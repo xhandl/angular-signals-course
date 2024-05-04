@@ -5,7 +5,7 @@ import {CoursesCardListComponent} from '../courses-card-list/courses-card-list.c
 import {CoursesService} from '../services/courses.service';
 import {openEditCourseDialog} from '../edit-course-dialog/edit-course-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
-import {LoadingService} from '../loading/loading.service';
+import {MessagesService} from '../messages/messages.service';
 
 @Component({
     selector: 'home',
@@ -36,13 +36,12 @@ export class HomeComponent {
         return courses.filter(course => course.category === 'ADVANCED');
     });
 
-    #loadingService = inject(LoadingService);
+    #messagesService = inject(MessagesService);
 
     constructor() {
         effect(() => {
             console.log('Beginner courses', this.beginnerCourses());
             console.log('Advanced courses', this.advancedCourses());
-
         });
 
         this.loadCourses()
@@ -51,14 +50,11 @@ export class HomeComponent {
 
     async loadCourses() {
         try {
-            this.#loadingService.loadingOn();
             const courses = await this.#coursesService.loadAllCourses();
             this.#courses.set(courses.sort(sortCoursesBySeqNo));
         } catch (error) {
-            alert('Error loading courses!');
+            this.#messagesService.showMessage('Error loading courses!', 'error');
             console.error(error);
-        } finally {
-            this.#loadingService.loadingOff();
         }
     }
 
