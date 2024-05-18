@@ -16,12 +16,7 @@
     </div>
 
     <div class="form-control">
-        <label>Course category:</label>
-        <select formControlName="category">
-            <option value="BEGINNER">Beginners</option>
-            <option value="INTERMEDIATE">Intermediate</option>
-            <option value="ADVANCED">Advanced</option>
-        </select>
+        <course-category-combobox label="Course category:" [(value)]="category"/>
     </div>
 
     <div class="form-control">

@@ -2,10 +2,10 @@ import {Component, computed, effect, inject, signal} from '@angular/core';
 import {Course, sortCoursesBySeqNo} from '../models/course.model';
 import {MatTab, MatTabGroup} from '@angular/material/tabs';
 import {CoursesCardListComponent} from '../courses-card-list/courses-card-list.component';
-import {CoursesService} from '../services/courses.service';
 import {openEditCourseDialog} from '../edit-course-dialog/edit-course-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
 import {MessagesService} from '../messages/messages.service';
+import {CoursesService} from '../services/courses.service';
 
 @Component({
     selector: 'home',
