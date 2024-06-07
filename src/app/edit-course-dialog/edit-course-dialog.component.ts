@@ -45,7 +45,7 @@ export class EditCourseDialogComponent {
             iconUrl: this.data?.course?.iconUrl
         });
 
-        this.category.set(this.data?.course!.category);
+        this.category.set(this.data?.course?.category ?? 'BEGINNER');
 
         effect(() => {
             console.log(`Course category: `, this.category());
