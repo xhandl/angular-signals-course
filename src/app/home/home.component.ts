@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject, signal} from '@angular/core';
+import {Component, computed, effect, inject, Injector, signal} from '@angular/core';
 import {Course, sortCoursesBySeqNo} from '../models/course.model';
 import {MatTab, MatTabGroup} from '@angular/material/tabs';
 import {CoursesCardListComponent} from '../courses-card-list/courses-card-list.component';
@@ -6,6 +6,8 @@ import {openEditCourseDialog} from '../edit-course-dialog/edit-course-dialog.com
 import {MatDialog} from '@angular/material/dialog';
 import {MessagesService} from '../messages/messages.service';
 import {CoursesService} from '../services/courses.service';
+import {toObservable, toSignal} from '@angular/core/rxjs-interop';
+import {catchError, from} from 'rxjs';
 
 @Component({
     selector: 'home',
@@ -38,14 +40,22 @@ export class HomeComponent {
 
     #messagesService = inject(MessagesService);
 
+    // courses$ = toObservable(this.#courses);
+
+    #injector = inject(Injector);
+
     constructor() {
-        effect(() => {
-            console.log('Beginner courses', this.beginnerCourses());
-            console.log('Advanced courses', this.advancedCourses());
-        });
+        // effect(() => {
+        //     console.log('Beginner courses', this.beginnerCourses());
+        //     console.log('Advanced courses', this.advancedCourses());
+        // });
 
         this.loadCourses()
             .then(() => console.log('Courses loaded: ', this.#courses()));
+
+        // this.courses$.subscribe(courses => {
+        //     console.log('courses$: ', courses);
+        // });
     }
 
     async loadCourses() {
@@ -94,6 +104,59 @@ export class HomeComponent {
         if (newCourse) {
             const courses = this.#courses();
             this.#courses.set([...courses, newCourse]);
+        }
+    }
+
+    protected readonly toObservable = toObservable;
+
+    toObservableExample() {
+        // const courses$ = this.toObservable(this.#courses, {
+        //     injector: this.#injector
+        // });
+        // courses$.subscribe(courses => {
+        //     console.log('courses$: ', courses);
+        // });
+
+        const numbers = signal(0);
+
+        numbers.set(1);
+        numbers.set(2);
+        numbers.set(3);
+
+        const numbers$ = this.toObservable(numbers, {
+            injector: this.#injector
+        });
+
+        numbers.set(4);
+
+        numbers$.subscribe(number => {
+            console.log('numbers$: ', number);
+        });
+
+        numbers.set(5);
+    }
+
+    onToSignalExample() {
+        try {
+            const courses$ = from(this.#coursesService.loadAllCourses())
+                .pipe(
+                    catchError(error => {
+                        console.error('Error in catchError: ', error);
+                        throw error;
+                    })
+                );
+
+            const courses = toSignal(courses$, {
+                injector: this.#injector
+            });
+
+            effect(() => {
+                console.log('courses: ', courses());
+            }, {
+                injector: this.#injector
+            });
+        } catch (error) {
+            console.error('Error in catch block: ', error);
         }
     }
 }
